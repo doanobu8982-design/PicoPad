@@ -1,0 +1,26 @@
+# Build outputs
+firmware/build/
+**/bin/
+**/obj/
+TestResults/
+dist/
+*.uf2
+*.elf
+*.bin
+*.hex
+*.o
+*.a
+
+# User runtime config
+profiles.json
+*.bak
+
+# Visual Studio / VS Code
+.vs/
+*.user
+*.suo
+.vscode/
+
+# Logs and temp files
+*.log
+*.tmp

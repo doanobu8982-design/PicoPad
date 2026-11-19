@@ -1,0 +1,783 @@
+<Window x:Class="GamepadEmulator.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="clr-namespace:GamepadEmulator.UI"
+        mc:Ignorable="d"
+        Title="PicoPad"
+        Icon="/Resources/app.ico"
+        Height="820" Width="1280"
+        MinHeight="750" MinWidth="1150"
+        Background="#1E1E2E" Foreground="#CDD6F4"
+        WindowStartupLocation="CenterScreen"
+        PreviewKeyDown="Window_PreviewKeyDown"
+        Deactivated="Window_Deactivated">
+
+    <Window.Resources>
+        <Style TargetType="{x:Type ui:OutlinedTextBlock}">
+            <Setter Property="Width" Value="100" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Fill" Value="#FFFFFF" />
+            <Setter Property="Stroke" Value="#000000" />
+            <Setter Property="StrokeThickness" Value="2.0" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+
+        <Style x:Key="IndicatorBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="Focusable" Value="False" />
+        </Style>
+
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="#89B4FA" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+
+        <Style x:Key="ActionButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#313244" />
+            <Setter Property="Foreground" Value="#CDD6F4" />
+            <Setter Property="BorderBrush" Value="#45475A" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="10,6" />
+            <Setter Property="Margin" Value="0,4" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="btnBorder" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#45475A" />
+                                <Setter TargetName="btnBorder" Property="BorderBrush" Value="#89B4FA" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="btnBorder" Property="Background" Value="#585B70" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="btnBorder" Property="Opacity" Value="0.4" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ComboBox Dark ControlTemplate: completely eliminates OS light theme wash-out in closed and open states -->
+        <ControlTemplate x:Key="DarkComboBoxTemplate" TargetType="ComboBox">
+            <Grid x:Name="MainGrid" SnapsToDevicePixels="True">
+                <ToggleButton x:Name="DropDownToggle" 
+                              Focusable="False"
+                              IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
+                              ClickMode="Press">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border x:Name="templateRoot" 
+                                    Background="#1E1E2E" 
+                                    BorderBrush="#45475A" 
+                                    BorderThickness="1.5" 
+                                    CornerRadius="6">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="30" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Dropdown Arrow -->
+                                    <Path x:Name="arrow" Grid.Column="1" 
+                                          Data="M 0 0 L 4 4 L 8 0 Z" 
+                                          Fill="#CDD6F4" 
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" />
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="templateRoot" Property="Background" Value="#313244" />
+                                    <Setter TargetName="templateRoot" Property="BorderBrush" Value="#89B4FA" />
+                                    <Setter TargetName="arrow" Property="Fill" Value="#FFFFFF" />
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="templateRoot" Property="Background" Value="#313244" />
+                                    <Setter TargetName="templateRoot" Property="BorderBrush" Value="#89B4FA" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="templateRoot" Property="Opacity" Value="0.4" />
+                                    <Setter TargetName="arrow" Property="Fill" Value="#6C7086" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
+
+                <!-- Selected item display (Closed state) -->
+                <ContentPresenter x:Name="contentPresenter" 
+                                  Content="{TemplateBinding SelectionBoxItem}"
+                                  ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                  ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
+                                  ContentStringFormat="{TemplateBinding SelectionBoxItemStringFormat}"
+                                  HorizontalAlignment="Left" 
+                                  VerticalAlignment="Center" 
+                                  Margin="12,0,32,0" 
+                                  IsHitTestVisible="False"
+                                  TextElement.Foreground="#FFFFFF"
+                                  TextElement.FontSize="12"
+                                  TextElement.FontWeight="SemiBold" />
+
+                <!-- Placeholder when 0 profiles or unselected -->
+                <TextBlock x:Name="placeholderText" 
+                           Text="（プロファイルなし）" 
+                           Foreground="#6C7086" 
+                           FontSize="12" 
+                           FontWeight="Normal"
+                           HorizontalAlignment="Left" 
+                           VerticalAlignment="Center" 
+                           Margin="12,0,32,0" 
+                           IsHitTestVisible="False" 
+                           Visibility="Collapsed" />
+
+                <!-- Dropdown Popup -->
+                <Popup x:Name="PART_Popup" 
+                       AllowsTransparency="True" 
+                       IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                       Placement="Bottom" 
+                       PopupAnimation="Slide">
+                    <Border x:Name="dropDownBorder" 
+                            Background="#1E1E2E" 
+                            BorderBrush="#45475A" 
+                            BorderThickness="1.5" 
+                            CornerRadius="6" 
+                            Margin="0,2,0,0"
+                            MinWidth="{Binding ActualWidth, ElementName=MainGrid}"
+                            MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                        <ScrollViewer x:Name="DropDownScrollViewer" VerticalScrollBarVisibility="Auto">
+                            <ItemsPresenter x:Name="ItemsPresenter" 
+                                            KeyboardNavigation.DirectionalNavigation="Contained" 
+                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                        </ScrollViewer>
+                    </Border>
+                </Popup>
+            </Grid>
+            <ControlTemplate.Triggers>
+                <Trigger Property="HasItems" Value="False">
+                    <Setter TargetName="placeholderText" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="contentPresenter" Property="Visibility" Value="Collapsed" />
+                </Trigger>
+                <Trigger Property="SelectedIndex" Value="-1">
+                    <Setter TargetName="placeholderText" Property="Visibility" Value="Visible" />
+                    <Setter TargetName="contentPresenter" Property="Visibility" Value="Collapsed" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" /> <!-- Header & Status -->
+            <RowDefinition Height="Auto" /> <!-- Packet Hex Display -->
+            <RowDefinition Height="*" />    <!-- Main Controls & Gamepad Indicators -->
+            <RowDefinition Height="Auto" /> <!-- Footer / Admin Check -->
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#181825" CornerRadius="8" Padding="14" Margin="0,0,0,12">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+                    <TextBlock Text="ゲームパッドエミュレーター" 
+                               FontSize="18" FontWeight="Bold" Foreground="#F5C2E7" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border x:Name="HwStatusBadgeBorder" CornerRadius="12" Background="#45475A" Padding="10,5" Margin="4,0">
+                        <TextBlock x:Name="HwStatusBadge" Text="接続状態: Pico未接続 / 待機中" 
+                                   Foreground="#F9E2AF" FontWeight="SemiBold" FontSize="11" />
+                    </Border>
+                    <Border x:Name="AdminBadgeBorder" CornerRadius="12" Background="#A6E3A1" Padding="10,5" Margin="4,0">
+                        <TextBlock x:Name="AdminBadgeText" Text="管理者権限: 有効 (UIPI安全)" 
+                                   Foreground="#11111B" FontWeight="Bold" FontSize="11" />
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Packet Hex Display -->
+        <Border Grid.Row="1" Background="#11111B" CornerRadius="8" Padding="16" Margin="0,0,0,12"
+                BorderBrush="#89B4FA" BorderThickness="1.5">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="送信パケット (6B):" VerticalAlignment="Center" FontWeight="Bold" 
+                           FontSize="15" Foreground="#89B4FA" Margin="0,0,16,0" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Byte 0 -->
+                    <Border CornerRadius="4" Background="#181825" BorderBrush="#CBA6F7" BorderThickness="1" Padding="8,4" Margin="3,0">
+                        <StackPanel>
+                            <TextBlock Text="H (0)" FontSize="9" Foreground="#6C7086" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="HexByte0" Text="5A" FontFamily="Consolas" FontSize="18" FontWeight="Bold" Foreground="#CBA6F7" />
+                        </StackPanel>
+                    </Border>
+                    <!-- Byte 1 -->
+                    <Border CornerRadius="4" Background="#181825" BorderBrush="#89B4FA" BorderThickness="1" Padding="8,4" Margin="3,0">
+                        <StackPanel>
+                            <TextBlock Text="DPad (1)" FontSize="9" Foreground="#6C7086" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="HexByte1" Text="00" FontFamily="Consolas" FontSize="18" FontWeight="Bold" Foreground="#89B4FA" />
+                        </StackPanel>
+                    </Border>
+                    <!-- Byte 2 -->
+                    <Border CornerRadius="4" Background="#181825" BorderBrush="#A6E3A1" BorderThickness="1" Padding="8,4" Margin="3,0">
+                        <StackPanel>
+                            <TextBlock Text="Btn (2)" FontSize="9" Foreground="#6C7086" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="HexByte2" Text="00" FontFamily="Consolas" FontSize="18" FontWeight="Bold" Foreground="#A6E3A1" />
+                        </StackPanel>
+                    </Border>
+                    <!-- Byte 3 -->
+                    <Border CornerRadius="4" Background="#181825" BorderBrush="#FAB387" BorderThickness="1" Padding="8,4" Margin="3,0">
+                        <StackPanel>
+                            <TextBlock Text="Stick (3)" FontSize="9" Foreground="#6C7086" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="HexByte3" Text="00" FontFamily="Consolas" FontSize="18" FontWeight="Bold" Foreground="#FAB387" />
+                        </StackPanel>
+                    </Border>
+                    <!-- Byte 4 -->
+                    <Border CornerRadius="4" Background="#181825" BorderBrush="#F38BA8" BorderThickness="1" Padding="8,4" Margin="3,0">
+                        <StackPanel>
+                            <TextBlock Text="Trig (4)" FontSize="9" Foreground="#6C7086" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="HexByte4" Text="00" FontFamily="Consolas" FontSize="18" FontWeight="Bold" Foreground="#F38BA8" />
+                        </StackPanel>
+                    </Border>
+                    <!-- Byte 5 -->
+                    <Border CornerRadius="4" Background="#181825" BorderBrush="#F9E2AF" BorderThickness="1" Padding="8,4" Margin="3,0">
+                        <StackPanel>
+                            <TextBlock Text="CRC-8 (5)" FontSize="9" Foreground="#6C7086" HorizontalAlignment="Center" />
+                            <TextBlock x:Name="HexByte5" Text="27" FontFamily="Consolas" FontSize="18" FontWeight="Bold" Foreground="#F9E2AF" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock x:Name="PacketRateText" Text="パケット数: 0" FontFamily="Consolas" FontSize="11" Foreground="#A6ADC8" />
+                    <TextBlock x:Name="LatencyText" Text="周期: ~8ms (125Hz)" FontFamily="Consolas" FontSize="11" Foreground="#A6ADC8" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Workspace -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="340" />
+                <ColumnDefinition Width="16" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Left: Settings & Control Panel -->
+            <Border Grid.Column="0" Background="#181825" CornerRadius="8" Padding="14">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Pico Hardware Controls: Unified Mode Toggle Button -->
+                        <TextBlock Text="ハードウェア制御" Style="{StaticResource SectionHeaderStyle}" />
+                        <Border CornerRadius="6" Background="#313244" Padding="10" Margin="0,0,0,12">
+                            <StackPanel>
+                                <Button x:Name="BtnModeToggle" Content="通常モード (待機中) → クリックでゲームモード起動" 
+                                        Style="{StaticResource ActionButtonStyle}" 
+                                        Background="#89B4FA" Foreground="#11111B"
+                                        FontSize="12" Padding="10,8" Margin="0"
+                                        Focusable="False"
+                                        Click="BtnModeToggle_Click" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Profile Management -->
+                        <TextBlock Text="プロファイル管理" Style="{StaticResource SectionHeaderStyle}" />
+                        <Border CornerRadius="6" Background="#313244" Padding="10" Margin="0,0,0,12">
+                            <StackPanel>
+                                <TextBlock Text="アクティブプロファイル:" FontSize="12" Foreground="#BAC2DE" Margin="0,0,0,4" />
+                                
+                                <!-- ComboBox styled with custom Dark Template -->
+                                <ComboBox x:Name="ProfileComboBox" Height="32" Margin="0,0,0,8"
+                                          SelectionChanged="ProfileComboBox_SelectionChanged"
+                                          DropDownClosed="ProfileComboBox_DropDownClosed"
+                                          DisplayMemberPath="Name"
+                                          Template="{StaticResource DarkComboBoxTemplate}">
+                                    <ComboBox.ItemContainerStyle>
+                                        <Style TargetType="ComboBoxItem">
+                                            <Setter Property="Background" Value="#1E1E2E" />
+                                            <Setter Property="Foreground" Value="#FFFFFF" />
+                                            <Setter Property="Padding" Value="8,6" />
+                                            <Setter Property="FontSize" Value="12" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="ComboBoxItem">
+                                                        <Border x:Name="itemBorder" Background="{TemplateBinding Background}"
+                                                                Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter TextElement.Foreground="{TemplateBinding Foreground}" />
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsHighlighted" Value="True">
+                                                                <Setter TargetName="itemBorder" Property="Background" Value="#45475A" />
+                                                                <Setter Property="Foreground" Value="#FFFFFF" />
+                                                            </Trigger>
+                                                            <Trigger Property="IsSelected" Value="True">
+                                                                <Setter TargetName="itemBorder" Property="Background" Value="#313244" />
+                                                                <Setter Property="Foreground" Value="#89B4FA" />
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </ComboBox.ItemContainerStyle>
+                                </ComboBox>
+
+                                <!-- Row 1: Profile CRUD (2x2 Grid) -->
+                                <Grid Margin="0,2,0,6">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="6" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="4" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <Button x:Name="BtnNewProfile" Grid.Row="0" Grid.Column="0" Content="➕ 新規作成" 
+                                            Style="{StaticResource ActionButtonStyle}" FontSize="11" Padding="4,6" Margin="0"
+                                            Focusable="False"
+                                            Click="BtnNewProfile_Click" />
+                                    <Button x:Name="DuplicateProfileButton" Grid.Row="0" Grid.Column="2" Content="複製" 
+                                            Style="{StaticResource ActionButtonStyle}" FontSize="11" Padding="4,6" Margin="0"
+                                            Focusable="False"
+                                            Click="DuplicateProfileButton_Click" />
+                                    <Button x:Name="BtnRenameProfile" Grid.Row="2" Grid.Column="0" Content="✏ 名前変更" 
+                                            Style="{StaticResource ActionButtonStyle}" FontSize="11" Padding="4,6" Margin="0"
+                                            Focusable="False"
+                                            Click="BtnRenameProfile_Click" />
+                                    <Button x:Name="BtnDeleteProfile" Grid.Row="2" Grid.Column="2" Content="🗑 削除" 
+                                            Style="{StaticResource ActionButtonStyle}" FontSize="11" Padding="4,6" Margin="0"
+                                            Focusable="False"
+                                            Click="BtnDeleteProfile_Click" />
+                                </Grid>
+
+                                <!-- Row 2: Explicit Save & Revert Buttons -->
+                                <Grid Margin="0,0,0,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="6" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <Button x:Name="BtnSaveProfile" Grid.Column="0" Content="💾 設定を保存" 
+                                            Style="{StaticResource ActionButtonStyle}"
+                                            Background="#A6E3A1" Foreground="#11111B" FontSize="11" Padding="4,6"
+                                            Focusable="False"
+                                            Click="BtnSaveProfile_Click" />
+                                    <Button x:Name="BtnRevertProfile" Grid.Column="2" Content="↩ 変更を破棄" 
+                                            Style="{StaticResource ActionButtonStyle}"
+                                            Background="#F38BA8" Foreground="#11111B" FontSize="11" Padding="4,6"
+                                            Focusable="False"
+                                            Click="BtnRevertProfile_Click" />
+                                </Grid>
+
+                                <!-- Save / Revert Feedback Status -->
+                                <TextBlock x:Name="TxtSaveStatus" Text="✔ 設定を保存しました" 
+                                           FontSize="11" FontWeight="SemiBold" Foreground="#A6E3A1" 
+                                           HorizontalAlignment="Center" Margin="0,4,0,0"
+                                           Visibility="Collapsed" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Profile Behavior Settings -->
+                        <TextBlock Text="プロファイル動作設定" Style="{StaticResource SectionHeaderStyle}" />
+                        <Border CornerRadius="6" Background="#313244" Padding="10" Margin="0,0,0,12">
+                            <StackPanel>
+                                <TextBlock Text="MODE切替 (Logicool F310相当):" FontWeight="SemiBold" FontSize="12" Foreground="#89B4FA" />
+                                <CheckBox x:Name="ModeCheckBox" Content="MODE ON (左スティックXY軸に出力)"
+                                          IsChecked="false" Margin="0,6,0,4"
+                                          Focusable="False"
+                                          Checked="ModeCheckBox_Checked" Unchecked="ModeCheckBox_Unchecked"
+                                          Foreground="#CDD6F4" FontSize="12" />
+                                <TextBlock x:Name="ModeDescriptionText" 
+                                           Text="OFF: D-Pad出力 (SF6 / MBTL推奨)&#x0a;ON: 左スティック出力 (東方非想天則推奨)" 
+                                           FontSize="11" Foreground="#A6ADC8" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Key Binding Instructions -->
+                        <TextBlock Text="キーバインド設定方法" Style="{StaticResource SectionHeaderStyle}" />
+                        <Border CornerRadius="6" Background="#11111B" Padding="10">
+                            <StackPanel>
+                                <TextBlock FontSize="11" Foreground="#BAC2DE" TextWrapping="Wrap" LineHeight="18">
+                                    • <Bold Foreground="#89B4FA">変更・追加:</Bold> 右側の各ボタン枠を左クリック → 割り当てたいキーを押下&#x0a;
+                                    • <Bold Foreground="#F38BA8">解除:</Bold> 右クリック または Escキーで未設定に全解除&#x0a;
+                                    • <Bold Foreground="#A6E3A1">保存・破棄:</Bold> 設定変更後は「💾 設定を保存」で確定、「↩ 変更を破棄」で巻き戻し可能&#x0a;
+                                    • <Bold Foreground="#CDD6F4">自由な編集:</Bold> プロファイルはすべて自由に変更・削除可能です。
+                                </TextBlock>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- Right: Virtual Gamepad Visualizer -->
+            <Border Grid.Column="2" Background="#181825" CornerRadius="8" Padding="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="仮想ゲームパッド入力状態モニタ / キーバインド設定" Style="{StaticResource SectionHeaderStyle}" />
+
+                    <!-- Direct Controller Layout (Real button overlay & direct glow) -->
+                    <Border Grid.Row="1" Background="#11111B" CornerRadius="8" Padding="6"
+                            BorderBrush="#313244" BorderThickness="1">
+                        <Viewbox Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Canvas Width="1095" Height="677">
+                                <!-- Layer 1: Triggers (Back layer, behind body) -->
+                                <Border x:Name="Ind_LT" Tag="LT" Width="143" Height="131" CornerRadius="16"
+                                        Canvas.Left="145.4" Canvas.Top="11.5" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_LT_normal" Source="pack://application:,,,/Resources/Images/Buttons/btn_lt_normal.png" Stretch="Uniform" Focusable="False" IsHitTestVisible="False" />
+                                        <Image x:Name="Img_LT_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_lt_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_LT" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_RT" Tag="RT" Width="145" Height="132" CornerRadius="16"
+                                        Canvas.Left="805.5" Canvas.Top="10.0" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_RT_normal" Source="pack://application:,,,/Resources/Images/Buttons/btn_rt_normal.png" Stretch="Uniform" Focusable="False" IsHitTestVisible="False" />
+                                        <Image x:Name="Img_RT_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_rt_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_RT" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Layer 2: Central Controller Body Graphic (Official VSCView dimensions: 1063 x 658) -->
+                                <Image Source="pack://application:,,,/Resources/Images/controller_front.png" 
+                                       Canvas.Left="15.5" Canvas.Top="11.0" Width="1063" Height="658" 
+                                       Stretch="Uniform" Focusable="False" IsHitTestVisible="False" />
+
+                                <!-- Layer 3: Bumpers (Foreground layer, in front of body for full cyan surface glow) -->
+                                <Border x:Name="Ind_LB" Tag="LB" Width="262" Height="100" CornerRadius="14"
+                                        Canvas.Left="126.0" Canvas.Top="93.0" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_LB_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_lb_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_LB" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_RB" Tag="RB" Width="261" Height="100" CornerRadius="14"
+                                        Canvas.Left="707.5" Canvas.Top="93.0" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_RB_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_rb_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_RB" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Layer 4: Forefront Controls (Face buttons, D-Pad, Sticks, System buttons) -->
+                                <!-- System Buttons (Back, Guide, Start) -->
+                                <Border x:Name="Ind_Guide" Tag="Guide" Width="90" Height="85" CornerRadius="45"
+                                        Canvas.Left="502.0" Canvas.Top="198.5" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_Guide_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_guide_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_Guide" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_Back" Tag="Back" Width="53" Height="48" CornerRadius="12"
+                                        Canvas.Left="434.5" Canvas.Top="328.0" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_Back_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_back_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_Back" Text="(未設定)" 
+                                                              Margin="0,-64,0,0"
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_Start" Tag="Start" Width="54" Height="49" CornerRadius="12"
+                                        Canvas.Left="605.0" Canvas.Top="327.5" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_Start_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_start_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_Start" Text="(未設定)" 
+                                                              Margin="0,-64,0,0"
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Left Analog Stick (L3) -->
+                                <Border x:Name="Ind_L3" Tag="L3" Width="127" Height="125" CornerRadius="63"
+                                        Canvas.Left="189.5" Canvas.Top="301.5" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_L3_pressed" Source="pack://application:,,,/Resources/Images/Buttons/stick_l3_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_L3" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Right Analog Stick (R3) -->
+                                <Border x:Name="Ind_R3" Tag="R3" Width="127" Height="120" CornerRadius="63"
+                                        Canvas.Left="630.5" Canvas.Top="465.0" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_R3_pressed" Source="pack://application:,,,/Resources/Images/Buttons/stick_r3_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_R3" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- D-Pad (Up, Down, Left, Right) -->
+                                <Border x:Name="Ind_Up" Tag="Up" Width="67" Height="68" CornerRadius="10"
+                                        Canvas.Left="360.5" Canvas.Top="438.0" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_Up_pressed" Source="pack://application:,,,/Resources/Images/Buttons/dpad_up_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_Up" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_Left" Tag="Left" Width="86" Height="60" CornerRadius="10"
+                                        Canvas.Left="312.0" Canvas.Top="476.0" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_Left_pressed" Source="pack://application:,,,/Resources/Images/Buttons/dpad_left_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_Left" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_Right" Tag="Right" Width="84" Height="60" CornerRadius="10"
+                                        Canvas.Left="395.0" Canvas.Top="477.0" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_Right_pressed" Source="pack://application:,,,/Resources/Images/Buttons/dpad_right_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_Right" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_Down" Tag="Down" Width="66" Height="71" CornerRadius="10"
+                                        Canvas.Left="364.0" Canvas.Top="503.5" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_Down_pressed" Source="pack://application:,,,/Resources/Images/Buttons/dpad_down_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_Down" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <!-- Face Buttons (Y, X, B, A) -->
+                                <Border x:Name="Ind_Y" Tag="Y" Width="85" Height="79" CornerRadius="40"
+                                        Canvas.Left="808.5" Canvas.Top="235.5" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_Y_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_y_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_Y" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_X" Tag="X" Width="83" Height="77" CornerRadius="40"
+                                        Canvas.Left="726.5" Canvas.Top="311.5" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_X_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_x_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_X" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_B" Tag="B" Width="81" Height="76" CornerRadius="40"
+                                        Canvas.Left="888.5" Canvas.Top="304.0" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_B_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_b_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_B" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+
+                                <Border x:Name="Ind_A" Tag="A" Width="81" Height="75" CornerRadius="40"
+                                        Canvas.Left="804.5" Canvas.Top="377.5" Focusable="False"
+                                        Style="{StaticResource IndicatorBorderStyle}" Cursor="Hand"
+                                        PreviewMouseLeftButtonDown="BindingTarget_MouseLeftButtonDown"
+                                        PreviewMouseRightButtonDown="BindingTarget_MouseRightButtonDown"
+                                        ClipToBounds="False"
+                                        ToolTip="左クリック: キー追加 / 右クリック: 解除">
+                                    <Grid ClipToBounds="False">
+                                        <Image x:Name="Img_A_pressed" Source="pack://application:,,,/Resources/Images/Buttons/btn_a_pressed.png" Stretch="Uniform" Visibility="Hidden" Focusable="False" IsHitTestVisible="False" />
+                                        <ui:OutlinedTextBlock x:Name="Txt_A" Text="(未設定)" 
+                                                              FontSize="18" FontWeight="Bold"
+                                                              Fill="#FFFFFF" Stroke="#000000" Width="100" StrokeThickness="2.0"
+                                                              HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                              Focusable="False" IsHitTestVisible="False" />
+                                    </Grid>
+                                </Border>
+                            </Canvas>
+                        </Viewbox>
+                    </Border>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="3" Background="#181825" CornerRadius="6" Padding="8,6" Margin="0,10,0,0">
+            <TextBlock x:Name="FooterText" 
+                       Text="CPT準拠SOCDクリーナー作動中 (←+→=N, ↑+↓=N)" 
+                       FontSize="11" Foreground="#A6ADC8" HorizontalAlignment="Center" />
+        </Border>
+    </Grid>
+</Window>

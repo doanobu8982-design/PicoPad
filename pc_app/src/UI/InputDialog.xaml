@@ -1,0 +1,66 @@
+<Window x:Class="GamepadEmulator.UI.InputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="入力" Height="180" Width="380"
+        Background="#1E1E2E" Foreground="#CDD6F4"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        ShowInTaskbar="False">
+    <Window.Resources>
+        <Style x:Key="DialogButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#313244" />
+            <Setter Property="Foreground" Value="#CDD6F4" />
+            <Setter Property="BorderBrush" Value="#45475A" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="14,6" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#45475A" />
+                                <Setter TargetName="border" Property="BorderBrush" Value="#89B4FA" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#585B70" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="18">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <TextBlock x:Name="PromptText" Grid.Row="0" Text="入力してください:"
+                   FontSize="13" Foreground="#BAC2DE" Margin="0,0,0,10" />
+
+        <TextBox x:Name="InputTextBox" Grid.Row="1" Height="32"
+                 Background="#313244" Foreground="#CDD6F4" BorderBrush="#45475A"
+                 BorderThickness="1.5" Padding="6,4" FontSize="13"
+                 CaretBrush="#CDD6F4" VerticalContentAlignment="Center"
+                 KeyDown="InputTextBox_KeyDown" />
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <Button x:Name="BtnOk" Content="OK" Style="{StaticResource DialogButtonStyle}"
+                    Background="#89B4FA" Foreground="#11111B" Margin="0,0,8,0"
+                    Click="BtnOk_Click" />
+            <Button x:Name="BtnCancel" Content="キャンセル" Style="{StaticResource DialogButtonStyle}"
+                    Click="BtnCancel_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
+
